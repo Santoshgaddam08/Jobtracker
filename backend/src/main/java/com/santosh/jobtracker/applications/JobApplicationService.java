@@ -1,3 +1,5 @@
+import com.santosh.jobtracker.realtime.RealtimePublisher;
+
 package com.santosh.jobtracker.applications;
 
 import org.springframework.stereotype.Service;
@@ -11,11 +13,17 @@ public class JobApplicationService {
 
     private final JobApplicationRepository appRepo;
     private final StatusHistoryRepository historyRepo;
+    private final RealtimePublisher realtimePublisher;
 
-    public JobApplicationService(JobApplicationRepository appRepo, StatusHistoryRepository historyRepo) {
-        this.appRepo = appRepo;
-        this.historyRepo = historyRepo;
-    }
+
+  public JobApplicationService(JobApplicationRepository appRepo,
+                             StatusHistoryRepository historyRepo,
+                             RealtimePublisher realtimePublisher) {
+    this.appRepo = appRepo;
+    this.historyRepo = historyRepo;
+    this.realtimePublisher = realtimePublisher;
+}
+
 
     public List<JobApplication> list(String userId) {
         return appRepo.findByUserIdOrderByUpdatedAtDesc(userId);
@@ -57,6 +65,7 @@ public class JobApplicationService {
         h.setNote("Created");
         h.setChangedAt(Instant.now());
         historyRepo.save(h);
+        realtimePublisher.publishUserEvent(userId, "APPLICATION_CREATED", app);
 
         return app;
     }
@@ -73,6 +82,8 @@ public class JobApplicationService {
         app.setSalaryRange(req.salaryRange());
         app.setAppliedDate(req.appliedDate());
         app.setDescription(req.description());
+        realtimePublisher.publishUserEvent(userId, "APPLICATION_UPDATED", app);
+
 
         return appRepo.save(app);
     }
@@ -97,6 +108,8 @@ public class JobApplicationService {
         h.setNote(req.note());
         h.setChangedAt(Instant.now());
         historyRepo.save(h);
+        realtimePublisher.publishUserEvent(userId, "STATUS_CHANGED", app);
+
 
         return app;
     }
@@ -106,5 +119,7 @@ public class JobApplicationService {
         JobApplication app = appRepo.findById(id).orElseThrow();
         if (!app.getUserId().equals(userId)) throw new IllegalArgumentException("Forbidden");
         appRepo.delete(app);
+        realtimePublisher.publishUserEvent(userId, "APPLICATION_DELETED", id);
+
     }
 }
