@@ -1,4 +1,5 @@
 package com.santosh.jobtracker.applications;
+
 import com.santosh.jobtracker.realtime.RealtimePublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,40 +12,37 @@ public class JobApplicationService {
 
     private final JobApplicationRepository appRepo;
     private final StatusHistoryRepository historyRepo;
-    private final RealtimePublisher realtimePublisher;
     private final NoteRepository noteRepo;
     private final ReminderRepository reminderRepo;
+    private final RealtimePublisher realtimePublisher;
 
-
-  public JobApplicationService(JobApplicationRepository appRepo,
-                             StatusHistoryRepository historyRepo,
-                             NoteRepository noteRepo,
-                             ReminderRepository reminderRepo,
-                             RealtimePublisher realtimePublisher) {
-    this.appRepo = appRepo;
-    this.historyRepo = historyRepo;
-    this.noteRepo = noteRepo;
-    this.reminderRepo = reminderRepo;
-    this.realtimePublisher = realtimePublisher;
-}
-
-
+    public JobApplicationService(JobApplicationRepository appRepo,
+                                 StatusHistoryRepository historyRepo,
+                                 NoteRepository noteRepo,
+                                 ReminderRepository reminderRepo,
+                                 RealtimePublisher realtimePublisher) {
+        this.appRepo = appRepo;
+        this.historyRepo = historyRepo;
+        this.noteRepo = noteRepo;
+        this.reminderRepo = reminderRepo;
+        this.realtimePublisher = realtimePublisher;
+    }
 
     public List<JobApplication> list(String userId) {
         return appRepo.findByUserIdOrderByUpdatedAtDesc(userId);
     }
 
     public ApplicationDtos.DetailResponse detail(String userId, String id) {
-    JobApplication app = appRepo.findById(id).orElseThrow();
-    if (!app.getUserId().equals(userId)) throw new IllegalArgumentException("Forbidden");
+        JobApplication app = appRepo.findById(id).orElseThrow();
+        if (!app.getUserId().equals(userId)) throw new IllegalArgumentException("Forbidden");
 
-    return new ApplicationDtos.DetailResponse(
-            app,
-            historyRepo.findByUserIdAndApplicationIdOrderByChangedAtDesc(userId, id),
-            noteRepo.findByUserIdAndApplicationIdOrderByCreatedAtDesc(userId, id),
-            reminderRepo.findByUserIdAndApplicationIdOrderByDueAtAsc(userId, id)
-    );
-}
+        return new ApplicationDtos.DetailResponse(
+                app,
+                historyRepo.findByUserIdAndApplicationIdOrderByChangedAtDesc(userId, id),
+                noteRepo.findByUserIdAndApplicationIdOrderByCreatedAtDesc(userId, id),
+                reminderRepo.findByUserIdAndApplicationIdOrderByDueAtAsc(userId, id)
+        );
+    }
 
     @Transactional
     public JobApplication create(String userId, ApplicationDtos.CreateRequest req) {
@@ -73,8 +71,8 @@ public class JobApplicationService {
         h.setNote("Created");
         h.setChangedAt(Instant.now());
         historyRepo.save(h);
-        realtimePublisher.publishUserEvent(userId, "APPLICATION_CREATED", app);
 
+        realtimePublisher.publishUserEvent(userId, "APPLICATION_CREATED", app);
         return app;
     }
 
@@ -90,10 +88,10 @@ public class JobApplicationService {
         app.setSalaryRange(req.salaryRange());
         app.setAppliedDate(req.appliedDate());
         app.setDescription(req.description());
+
+        app = appRepo.save(app);
         realtimePublisher.publishUserEvent(userId, "APPLICATION_UPDATED", app);
-
-
-        return appRepo.save(app);
+        return app;
     }
 
     @Transactional
@@ -116,9 +114,8 @@ public class JobApplicationService {
         h.setNote(req.note());
         h.setChangedAt(Instant.now());
         historyRepo.save(h);
+
         realtimePublisher.publishUserEvent(userId, "STATUS_CHANGED", app);
-
-
         return app;
     }
 
@@ -126,40 +123,40 @@ public class JobApplicationService {
     public void delete(String userId, String id) {
         JobApplication app = appRepo.findById(id).orElseThrow();
         if (!app.getUserId().equals(userId)) throw new IllegalArgumentException("Forbidden");
+
         appRepo.delete(app);
         realtimePublisher.publishUserEvent(userId, "APPLICATION_DELETED", id);
+    }
 
+    @Transactional
+    public Note addNote(String userId, String appId, ApplicationDtos.NoteCreateRequest req) {
+        JobApplication app = appRepo.findById(appId).orElseThrow();
+        if (!app.getUserId().equals(userId)) throw new IllegalArgumentException("Forbidden");
+
+        Note note = new Note();
+        note.setUserId(userId);
+        note.setApplicationId(appId);
+        note.setBody(req.body());
+        note = noteRepo.save(note);
+
+        realtimePublisher.publishUserEvent(userId, "NOTE_ADDED", note);
+        return note;
+    }
+
+    @Transactional
+    public Reminder addReminder(String userId, String appId, ApplicationDtos.ReminderCreateRequest req) {
+        JobApplication app = appRepo.findById(appId).orElseThrow();
+        if (!app.getUserId().equals(userId)) throw new IllegalArgumentException("Forbidden");
+
+        Reminder r = new Reminder();
+        r.setUserId(userId);
+        r.setApplicationId(appId);
+        r.setTitle(req.title());
+        r.setDueAt(req.dueAt());
+        r.setSent(false);
+        r = reminderRepo.save(r);
+
+        realtimePublisher.publishUserEvent(userId, "REMINDER_ADDED", r);
+        return r;
     }
 }
-@Transactional
-public Note addNote(String userId, String appId, ApplicationDtos.NoteCreateRequest req) {
-    JobApplication app = appRepo.findById(appId).orElseThrow();
-    if (!app.getUserId().equals(userId)) throw new IllegalArgumentException("Forbidden");
-
-    Note note = new Note();
-    note.setUserId(userId);
-    note.setApplicationId(appId);
-    note.setBody(req.body());
-    note = noteRepo.save(note);
-
-    realtimePublisher.publishUserEvent(userId, "NOTE_ADDED", note);
-    return note;
-}
-@Transactional
-public Reminder addReminder(String userId, String appId, ApplicationDtos.ReminderCreateRequest req) {
-    JobApplication app = appRepo.findById(appId).orElseThrow();
-    if (!app.getUserId().equals(userId)) throw new IllegalArgumentException("Forbidden");
-
-    Reminder r = new Reminder();
-    r.setUserId(userId);
-    r.setApplicationId(appId);
-    r.setTitle(req.title());
-    r.setDueAt(req.dueAt());
-    r.setSent(false);
-
-    r = reminderRepo.save(r);
-
-    realtimePublisher.publishUserEvent(userId, "REMINDER_ADDED", r);
-    return r;
-}
-
