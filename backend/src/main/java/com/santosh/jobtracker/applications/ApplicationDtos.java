@@ -31,8 +31,14 @@ public class ApplicationDtos {
             String note
     ) {}
 
+    public record NoteCreateRequest(String body) {}
+
+    public record ReminderCreateRequest(String title, Instant dueAt) {}
+
     public record DetailResponse(
             JobApplication application,
-            List<StatusHistory> history
+            List<StatusHistory> history,
+            List<Note> notes,
+            List<Reminder> reminders
     ) {}
 }
