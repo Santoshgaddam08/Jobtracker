@@ -6,6 +6,9 @@ import java.time.Instant;
 @Entity
 @Table(name="status_history")
 public class StatusHistory {
+    long countByUserIdAndChangedAtAfter(String userId, Instant after);
+    long countByUserIdAndApplicationIdAndChangedAtAfter(String userId, String applicationId, Instant after);
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
