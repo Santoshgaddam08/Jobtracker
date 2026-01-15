@@ -41,13 +41,7 @@ public class AnalyticsService {
 
         // We don’t have a "findByUserId" method for status history yet, so we compute from all history items
         // but filtered by the user in memory using existing query per application.
-        long statusChangesLast7Days = 0;
-        for (JobApplication a : apps) {
-            List<StatusHistory> h = historyRepo.findByUserIdAndApplicationIdOrderByChangedAtDesc(userId, a.getId());
-            statusChangesLast7Days += h.stream()
-                    .filter(x -> x.getChangedAt() != null && x.getChangedAt().isAfter(last7))
-                    .count();
-        }
+        long statusChangesLast7Days = historyRepo.countByUserIdAndChangedAtAfter(userId, last7);
 
         // Top companies
         Map<String, Long> companyCounts = apps.stream()
