@@ -17,6 +17,7 @@
 /app/backend/src/main/java/com/santosh/jobtracker/auth/AuthDtos.java
 /app/backend/src/main/java/com/santosh/jobtracker/auth/AuthService.java
 /app/backend/src/main/java/com/santosh/jobtracker/auth/MeController.java
+/app/backend/src/main/java/com/santosh/jobtracker/config/CorsConfig.java
 /app/backend/src/main/java/com/santosh/jobtracker/config/JwtAuthFilter.java
 /app/backend/src/main/java/com/santosh/jobtracker/config/JwtService.java
 /app/backend/src/main/java/com/santosh/jobtracker/config/SecurityConfig.java
