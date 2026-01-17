@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+    <div id="test">Loading...</div>
+    <script>
+        document.getElementById('test').innerHTML = 'JavaScript Works!';
+        console.log('Basic JS working');
+    </script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script>
+        setTimeout(() => {
+            if (typeof React !== 'undefined') {
+                document.getElementById('test').innerHTML = 'React Loaded! Version: ' + React.version;
+                console.log('React loaded successfully');
+            } else {
+                document.getElementById('test').innerHTML = 'React NOT loaded';
+                console.error('React failed to load');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
