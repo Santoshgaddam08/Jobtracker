@@ -48,23 +48,14 @@ public class JobApplicationController {
         service.delete(userId(), id);
         return ResponseEntity.noContent().build();
     }
-@PostMapping("/{id}/notes")
-public ResponseEntity<?> addNote(@PathVariable String id, @RequestBody ApplicationDtos.NoteCreateRequest req) {
-    return ResponseEntity.ok(service.addNote(userId(), id, req));
-}
 
-@PostMapping("/{id}/reminders")
-public ResponseEntity<?> addReminder(@PathVariable String id, @RequestBody ApplicationDtos.ReminderCreateRequest req) {
-    return ResponseEntity.ok(service.addReminder(userId(), id, req));
-}
-}
-@PostMapping("/{id}/notes")
-public ResponseEntity<?> addNote(@PathVariable String id, @RequestBody ApplicationDtos.NoteCreateRequest req) {
-    return ResponseEntity.ok(service.addNote(userId(), id, req));
-}
+    @PostMapping("/{id}/notes")
+    public ResponseEntity<?> addNote(@PathVariable String id, @RequestBody ApplicationDtos.NoteCreateRequest req) {
+        return ResponseEntity.ok(service.addNote(userId(), id, req));
+    }
 
-@PostMapping("/{id}/reminders")
-public ResponseEntity<?> addReminder(@PathVariable String id, @RequestBody ApplicationDtos.ReminderCreateRequest req) {
-    return ResponseEntity.ok(service.addReminder(userId(), id, req));
+    @PostMapping("/{id}/reminders")
+    public ResponseEntity<?> addReminder(@PathVariable String id, @RequestBody ApplicationDtos.ReminderCreateRequest req) {
+        return ResponseEntity.ok(service.addReminder(userId(), id, req));
+    }
 }
-
