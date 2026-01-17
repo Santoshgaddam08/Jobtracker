@@ -1,6 +1,7 @@
 package com.santosh.jobtracker.users;
 
 import jakarta.persistence.*;
+import java.util.Locale;
 
 @Entity
 @Table(name = "users")
@@ -25,6 +26,14 @@ public class User {
         this.email = email;
         this.passwordHash = passwordHash;
         this.fullName = fullName;
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void normalizeEmail() {
+        if (email != null) {
+            email = email.toLowerCase(Locale.ROOT).trim();
+        }
     }
 
     public String getId() { return id; }
