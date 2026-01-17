@@ -481,4 +481,10 @@ function Settings({ onBack, toast }) {
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+// Ensure React and ReactDOM are loaded
+if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+} else {
+  console.error('React or ReactDOM not loaded!');
+  document.body.innerHTML = '<div style="padding: 20px; color: red;">Error: React libraries failed to load</div>';
+}
