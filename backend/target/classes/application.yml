@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: job-tracker
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:jobtracker}
+    username: ${DB_USER:jobtracker}
+    password: ${DB_PASSWORD:jobtracker}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-secret-change-me-please-32-chars-minimum}
+    issuer: job-tracker
+    ttlMinutes: 720
