@@ -1,3 +1,3 @@
 #!/bin/bash
 cd /app/frontend
-exec python3 -m http.server 3000
+exec /usr/local/bin/http-server -p 3000 -c-1
